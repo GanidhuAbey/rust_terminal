@@ -3,6 +3,8 @@ extern crate sfml;
 use sfml::graphics::{RenderWindow, Color, RenderTarget, Text, Font};
 use sfml::window::{Style, Event, Key};
 
+use std::process::Command;
+
 fn main() {
     //create terminal window
     let mut terminal = RenderWindow::new(
@@ -42,7 +44,7 @@ fn main() {
                         command = command[0..command.len() - 1].to_string();
                     }
                     //add new character to end command
-                    else {
+                    else if unicode != 0x08 as char {
                         command.push(unicode);
                     }
                     text.set_string(&command);
@@ -50,7 +52,26 @@ fn main() {
                 _ => (),
             }
         }
+        let mut output = String::new();
+        if run_command {
+            output = command_run(&command);
+            run_command = false;
+        }
+
         terminal.draw(&text);
         terminal.display()
     }
+}
+
+fn command_run(input: &String) -> String {
+    let command = input[2..input.len()].to_string();
+
+    let child = Command::new(command).spawn();
+
+    match child {
+        Ok(command) => command,
+        Err(e) => ,
+    }
+
+    String::from("ok")
 }
