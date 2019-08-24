@@ -68,10 +68,5 @@ fn command_run(input: &String) -> String {
 
     let child = Command::new(command).spawn();
 
-    match child {
-        Ok(command) => command,
-        Err(e) => ,
-    }
-
     String::from("ok")
 }
