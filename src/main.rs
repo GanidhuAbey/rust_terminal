@@ -8,6 +8,8 @@ use std::process::Command;
 use std::io::{self, Write, ErrorKind};
 use std::str;
 
+const DRAW_TEXT: usize = 0;
+
 fn main() {
     //create terminal window
     let mut terminal = RenderWindow::new(
@@ -21,12 +23,13 @@ fn main() {
     let mut next_command = false;
     let mut skip = 0.0;
     //define text
-    let mut command = String::from(">>");
+    let mut command: Vec<String> = vec![String::from(">>")];
+    let mut command_index = 0;
     let font = Font::from_file("resources/sansation.ttf").unwrap();
-    let mut text = Text::new(&command, &font, 12);
+    let mut text = Text::new(&command[command_index], &font, 12);
     text.set_fill_color(&Color::MAGENTA);
     text.set_outline_color(&Color::BLACK);
-    text.set_outline_thickness(2.5);
+    text.set_outline_thickness(2.0);
 
     let mut hide_command = String::from(">>");
     let mut hide_text = Text::new(&hide_command, &font, 12);
@@ -41,11 +44,11 @@ fn main() {
         if next_command {
             text.move_(Vector2f::new(0., skip));
             text.set_string(&"");
-            command = String::from(">>");
-            skip = 0.0;
+            command = vec![String::from(">>")];
             next_command = false;
+            hide_command = String::from(">>");
             hide_text.move_(Vector2f::new(0., skip));
-            hide_text.set_string(&"");
+            skip = 0.0;
         }
 
         let event = terminal.poll_event();
@@ -63,18 +66,20 @@ fn main() {
                     if unicode == 0xD as char {
                         run_command = true;
                     }
-                    else if unicode == 0x08 as char && command.len() > 2 {
-                        command = command[0..command.len() - 1].to_string();
-                        text.set_outline_color(&Color::BLACK);
-                        text.set_fill_color(&Color::MAGENTA);
+                    else if unicode == 0x08 as char && command[DRAW_TEXT].len() > 2 {
+                        command[DRAW_TEXT] = command[DRAW_TEXT][0..command[DRAW_TEXT].len() - 1].to_string();
+                        
                     }
                     //add new character to end command
                     else if unicode != 0x08 as char {
-                        command.push(unicode);
+                        command[DRAW_TEXT].push(unicode);
                         hide_command.push('⬜');
                     }
-                    text.set_string(&command);
+                    text.set_string(&command[DRAW_TEXT]);
                     hide_text.set_string(&hide_command);
+
+                    println!("typed text: {}", command[DRAW_TEXT]);
+                    println!("hide text: {}", hide_command);
                     
                 }
                 _ => (),
@@ -82,10 +87,11 @@ fn main() {
         }
         let mut output = String::new();
         if run_command {
-            output = command_run(&command);
+            output = command_run(&command[DRAW_TEXT]);
             run_command = false;
             text.set_string(&output);
             text.move_(Vector2f::new(0.0, 20.0));
+            hide_text.move_(Vector2f::new(0.0, 20.0));
             skip += 20.0;
             for i in output.chars() {
                 if i.to_string() == "\n".to_string() {
@@ -104,9 +110,7 @@ fn main() {
 
 fn command_run(input: &String) -> String {
     let command = input[2..input.len()].to_string();
-    println!("should print before error");
     let child = Command::new(command).output();
-    println!("should not print");
 
     match child.is_err() {
         true => {

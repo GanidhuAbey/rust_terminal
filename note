@@ -5,4 +5,6 @@
 		-this calls two draw calls on every loop which is far less efficient
 		-organizes the draw calls to only be at the bottom of the loop
 
-- TODO: Deal with Arg conditions	
+- TODO: Deal with Arg conditions
+	|change command to a vector so that it can hold arg conditions, that we only need to check the length of the vector to 		determine whether theres a arg command or not
+	|the unicode should be checked for a space in which case it should push a new string into it such as "String::new()"	
