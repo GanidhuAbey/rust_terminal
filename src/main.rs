@@ -1,10 +1,12 @@
 extern crate sfml;
 
-use sfml::graphics::{RenderWindow, Color, RenderTarget, Text, Font};
+use sfml::graphics::{RenderWindow, Color, RenderTarget, Text, Font, Transformable};
 use sfml::window::{Style, Event, Key};
+use sfml::system::{Vector2f};
 
 use std::process::Command;
 use std::io::{self, Write, ErrorKind};
+use std::str;
 
 fn main() {
     //create terminal window
@@ -16,6 +18,8 @@ fn main() {
     );
     //-----
     let mut run_command = false;
+    let mut next_command = false;
+    let mut skip = 0.0;
     //define text
     let mut command = String::from(">>");
     let font = Font::from_file("resources/sansation.ttf").unwrap();
@@ -25,10 +29,19 @@ fn main() {
     text.set_outline_thickness(5.0);
     //-----
     //loop till terminal is closed
+    terminal.set_active(true);
+    terminal.clear(&Color::rgb(20, 20, 15));
     while terminal.is_open() {
+        if next_command {
+            text.move_(Vector2f::new(0., skip));
+            text.set_string(&"");
+            command = String::from(">>");
+            skip = 0.0;
+            next_command = false;
+        }
+
         let event = terminal.poll_event();
         terminal.set_active(true);
-        terminal.clear(&Color::rgb(20, 20, 15));
         if event != None {
             match event.unwrap() {
                 //close condition
@@ -60,6 +73,16 @@ fn main() {
             output = command_run(&command);
             run_command = false;
             text.set_string(&output);
+            text.move_(Vector2f::new(0.0, 20.0));
+            skip += 20.0;
+            for i in output.chars() {
+                if i.to_string() == "\n".to_string() {
+                    skip += 15.0;
+                }
+            }
+
+            //i dont like how i implemented this, should be changed if possible
+            next_command = true;
         }
 
         terminal.draw(&text);
@@ -75,14 +98,15 @@ fn command_run(input: &String) -> String {
 
     match child.is_err() {
         true => {
-            
             let message = error_message(child.unwrap_err().kind());
-            println!("ERROR: {}", message);
+            return message
         },
-        false => io::stdout().write_all(&child.unwrap().stdout).unwrap(),
+        false => {
+            let message = str::from_utf8(&child.unwrap().stdout).unwrap().to_string();
+            return message
+        },
     }
     
-    String::from("ok")
 }
 
 fn error_message(kind: ErrorKind) -> String {
