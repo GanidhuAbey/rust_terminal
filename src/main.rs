@@ -57,7 +57,14 @@ fn main() {
                         println!("command has been inputed");
                     }
                     else if unicode == 0x08 as char && command.len() > 2 {
+                        text.set_fill_color(&Color::rgb(20, 20, 15));
+                        text.set_outline_color(&Color::rgb(20, 20, 15));
+                        text.set_character_size(14);
+                        terminal.draw(&text);
                         command = command[0..command.len() - 1].to_string();
+                        text.set_outline_color(&Color::BLACK);
+                        text.set_character_size(12);
+                        text.set_fill_color(&Color::MAGENTA);
                     }
                     //add new character to end command
                     else if unicode != 0x08 as char {

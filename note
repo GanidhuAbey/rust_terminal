@@ -1,0 +1,1 @@
+Currently the erase mechanism is broken because we don't clear the text on every loop like before, the only way i can imagine to fix this is running text colored with the same color as the background and then rewriting on top of that
