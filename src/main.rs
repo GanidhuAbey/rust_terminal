@@ -26,7 +26,13 @@ fn main() {
     let mut text = Text::new(&command, &font, 12);
     text.set_fill_color(&Color::MAGENTA);
     text.set_outline_color(&Color::BLACK);
-    text.set_outline_thickness(5.0);
+    text.set_outline_thickness(2.5);
+
+    let mut hide_command = String::from(">>");
+    let mut hide_text = Text::new(&hide_command, &font, 12);
+    hide_text.set_fill_color(&Color::rgb(20, 20, 15));
+    hide_text.set_outline_color(&Color::rgb(20, 20, 15));
+    hide_text.set_outline_thickness(5.0);
     //-----
     //loop till terminal is closed
     terminal.set_active(true);
@@ -38,6 +44,8 @@ fn main() {
             command = String::from(">>");
             skip = 0.0;
             next_command = false;
+            hide_text.move_(Vector2f::new(0., skip));
+            hide_text.set_string(&"");
         }
 
         let event = terminal.poll_event();
@@ -54,23 +62,20 @@ fn main() {
                     //check if character is a special input
                     if unicode == 0xD as char {
                         run_command = true;
-                        println!("command has been inputed");
                     }
                     else if unicode == 0x08 as char && command.len() > 2 {
-                        text.set_fill_color(&Color::rgb(20, 20, 15));
-                        text.set_outline_color(&Color::rgb(20, 20, 15));
-                        text.set_character_size(14);
-                        terminal.draw(&text);
                         command = command[0..command.len() - 1].to_string();
                         text.set_outline_color(&Color::BLACK);
-                        text.set_character_size(12);
                         text.set_fill_color(&Color::MAGENTA);
                     }
                     //add new character to end command
                     else if unicode != 0x08 as char {
                         command.push(unicode);
+                        hide_command.push('⬜');
                     }
                     text.set_string(&command);
+                    hide_text.set_string(&hide_command);
+                    
                 }
                 _ => (),
             }
@@ -91,9 +96,9 @@ fn main() {
             //i dont like how i implemented this, should be changed if possible
             next_command = true;
         }
-
+        terminal.draw(&hide_text);
         terminal.draw(&text);
-        terminal.display()
+        terminal.display();
     }
 }
 

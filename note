@@ -1,1 +1,8 @@
-Currently the erase mechanism is broken because we don't clear the text on every loop like before, the only way i can imagine to fix this is running text colored with the same color as the background and then rewriting on top of that
+- TODO: Properly Fix Erase Mechanism
+	|need to get rid of the random draw call in the middle of the if statement that handles backspace
+
+	|set a text font with the same characters as the actual text, color it the same as background, call this on every loop 		but don't change the text on backspace 
+		-this calls two draw calls on every loop which is far less efficient
+		-organizes the draw calls to only be at the bottom of the loop
+
+- TODO: Deal with Arg conditions	
